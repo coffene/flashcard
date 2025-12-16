@@ -72,26 +72,33 @@ export async function importDeck(deckData: Deck) {
 
             // Create cards
             if (deckData.cards && deckData.cards.length > 0) {
-                for (const card of deckData.cards) {
-                    await tx.card.create({
-                        data: {
-                            deckId: createdDeck.id,
-                            stem: card.stem,
-                            imageUrl: card.imageUrl,
-                            explanation: card.explanation,
-                            options: card.options as any, // Save as JSON
-                            correctOptionId: card.correctOptionId,
-                            // SRS State
-                            status: card.learningState?.status || 'New',
-                            nextReviewDate: card.learningState?.nextReviewDate ? new Date(card.learningState.nextReviewDate) : new Date(),
-                            interval: card.learningState?.interval || 0,
-                            easeFactor: card.learningState?.easeFactor || 2.5,
-                            repetitions: card.learningState?.repetitions || 0,
-                            lastReviewDate: card.learningState?.lastReviewDate ? new Date(card.learningState.lastReviewDate) : null,
-                        }
-                    });
-                }
+                // Batch create cards to avoid timeout
+                // MongoDB supports createMany but Prisma relation handling might be tricky
+                // Let's try createMany if possible, or optimize the loop
+
+                const cardsData = deckData.cards.map(card => ({
+                    deckId: createdDeck.id,
+                    stem: card.stem,
+                    imageUrl: card.imageUrl,
+                    explanation: card.explanation,
+                    options: card.options as any, // Save as JSON
+                    correctOptionId: card.correctOptionId,
+                    // SRS State
+                    status: card.learningState?.status || 'New',
+                    nextReviewDate: card.learningState?.nextReviewDate ? new Date(card.learningState.nextReviewDate) : new Date(),
+                    interval: card.learningState?.interval || 0,
+                    easeFactor: card.learningState?.easeFactor || 2.5,
+                    repetitions: card.learningState?.repetitions || 0,
+                    lastReviewDate: card.learningState?.lastReviewDate ? new Date(card.learningState.lastReviewDate) : null,
+                }));
+
+                await tx.card.createMany({
+                    data: cardsData
+                });
             }
+        }, {
+            maxWait: 10000, // default: 2000
+            timeout: 20000  // default: 5000
         });
 
         revalidatePath('/');
