@@ -34,8 +34,10 @@ export default function StudyPage({ params }: { params: Promise<{ deckId: string
         const currentCard = queue[currentIndex];
         const newLearningState = calculateNextReview(currentCard.learningState, rating);
 
-        // 1. Update Storage (Long term progress)
-        await updateCardState(deckId, currentCard.id, newLearningState);
+        // 1. Update Storage (Long term progress) - Fire and forget (Optimistic UI)
+        updateCardState(deckId, currentCard.id, newLearningState).catch(err => {
+            console.error("Failed to update card state in background:", err);
+        });
 
         // 2. Add to next round queue with updated state
         const updatedCard = { ...currentCard, learningState: newLearningState };
