@@ -1,0 +1,53 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL") // Uses connection pooling
+  directUrl = env("POSTGRES_URL_NON_POOLING") // Uses a direct connection
+}
+
+model Deck {
+  id          String   @id @default(cuid())
+  title       String
+  subject     String?
+  description String?
+  timeLimit   Int?
+  isReadOnly  Boolean  @default(false)
+  year        Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  cards       Card[]
+}
+
+model Card {
+  id              String   @id @default(cuid())
+  deckId          String
+  deck            Deck     @relation(fields: [deckId], references: [id], onDelete: Cascade)
+
+  // Question Content
+  stem            String
+  imageUrl        String?
+  level           String?  // 'Easy' | 'Medium' | 'Hard' | 'Expert'
+  explanation     String?
+
+  // Options (stored as JSON for simplicity)
+  options         Json     // Array of {id: string, text: string}
+  correctOptionId String
+
+  // SRS State
+  status          String   @default("New") // 'New' | 'Learning' | 'Review' | 'Relearning'
+  nextReviewDate  DateTime @default(now())
+  interval        Float    @default(0)
+  easeFactor      Float    @default(2.5)
+  repetitions     Int      @default(0)
+  lastReviewDate  DateTime?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}

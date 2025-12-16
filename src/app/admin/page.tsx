@@ -22,7 +22,8 @@ export default function AdminPage() {
             title: newDeckTitle,
             subject: newDeckSubject,
             cards: [],
-            isReadOnly: false
+            isReadOnly: false,
+            year: new Date().getFullYear()
         };
 
         addDeck(newDeck);
@@ -45,6 +46,7 @@ export default function AdminPage() {
                 id: parsed.id || `deck_${Date.now()}`,
                 subject: parsed.subject || 'Tổng hợp',
                 isReadOnly: false,
+                year: parsed.year || new Date().getFullYear(),
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 cards: parsed.cards.map((c: any) => ({
                     ...c,

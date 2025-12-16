@@ -38,7 +38,7 @@ export default function AdminDeckDetail({ params }: { params: Promise<{ deckId: 
                 { id: `${id}_2`, text: optC },
                 { id: `${id}_3`, text: optD },
             ],
-            correctAnswerId: `${id}_${correctIdx}`,
+            correctOptionId: `${id}_${correctIdx}`,
             explanation,
             learningState: { ...INITIAL_LEARNING_STATE }
         };
@@ -141,7 +141,7 @@ export default function AdminDeckDetail({ params }: { params: Promise<{ deckId: 
                                 <div className="font-bold text-gray-900 mb-1">Câu {idx + 1}: {card.stem}</div>
                                 <div className="text-sm text-gray-600 grid grid-cols-2 gap-x-4">
                                     {card.options.map((opt, i) => (
-                                        <span key={opt.id} className={card.correctAnswerId === opt.id ? "text-green-600 font-bold" : ""}>
+                                        <span key={opt.id} className={card.correctOptionId === opt.id ? "text-green-600 font-bold" : ""}>
                                             {['A', 'B', 'C', 'D'][i]}. {opt.text}
                                         </span>
                                     ))}

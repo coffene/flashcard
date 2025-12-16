@@ -37,10 +37,10 @@ export default function Flashcard({ card, onRate }: FlashcardProps) {
         }
 
         // Revealed state
-        if (optionId === card.correctAnswerId) {
+        if (optionId === card.correctOptionId) {
             return `${baseStyle} bg-green-100 border-green-500 font-bold`;
         }
-        if (selectedOption === optionId && optionId !== card.correctAnswerId) {
+        if (selectedOption === optionId && optionId !== card.correctOptionId) {
             return `${baseStyle} bg-red-100 border-red-500`;
         }
         return `${baseStyle} opacity-50`;

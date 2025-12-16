@@ -21,6 +21,15 @@ export interface LearningState {
     easeFactor: number; // SM-2 multiplier (default 2.5)
     repetitions: number; // Consecutive correct answers
     lastReviewDate?: number; // Timestamp of last review
+}
+
+export interface Card extends Question {
+    options: Option[];
+    correctOptionId: string;
+    learningState: LearningState;
+    explanation?: string;
+}
+
 export interface Deck {
     id: string;
     title: string;

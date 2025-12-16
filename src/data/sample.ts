@@ -14,6 +14,8 @@ const createCard = (
         stem,
         imageUrl,
         explanation,
+        options: options.map((text, i) => ({ id: `${id}_${i}`, text })),
+        correctOptionId: `${id}_${correctIndex}`,
         learningState: { ...INITIAL_LEARNING_STATE },
     };
 };
@@ -24,6 +26,7 @@ export const SAMPLE_DECK: Deck = {
     subject: 'Vật Lí',
     timeLimit: 50,
     isReadOnly: true,
+    year: 2024,
     cards: [
         createCard(
             'q1',
