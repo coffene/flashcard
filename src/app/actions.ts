@@ -57,43 +57,48 @@ export async function createDeck(title: string, subject: string): Promise<Deck |
 
 export async function importDeck(deckData: Deck) {
     try {
-        // Create deck first
-        const createdDeck = await prisma.deck.create({
-            data: {
-                title: deckData.title,
-                subject: deckData.subject,
-                year: deckData.year || new Date().getFullYear(),
-                timeLimit: deckData.timeLimit,
-                isReadOnly: deckData.isReadOnly,
+        // Use transaction to ensure all or nothing
+        await prisma.$transaction(async (tx) => {
+            // Create deck first
+            const createdDeck = await tx.deck.create({
+                data: {
+                    title: deckData.title,
+                    subject: deckData.subject,
+                    year: deckData.year || new Date().getFullYear(),
+                    timeLimit: deckData.timeLimit,
+                    isReadOnly: deckData.isReadOnly,
+                }
+            });
+
+            // Create cards
+            if (deckData.cards && deckData.cards.length > 0) {
+                for (const card of deckData.cards) {
+                    await tx.card.create({
+                        data: {
+                            deckId: createdDeck.id,
+                            stem: card.stem,
+                            imageUrl: card.imageUrl,
+                            explanation: card.explanation,
+                            options: card.options as any, // Save as JSON
+                            correctOptionId: card.correctOptionId,
+                            // SRS State
+                            status: card.learningState?.status || 'New',
+                            nextReviewDate: card.learningState?.nextReviewDate ? new Date(card.learningState.nextReviewDate) : new Date(),
+                            interval: card.learningState?.interval || 0,
+                            easeFactor: card.learningState?.easeFactor || 2.5,
+                            repetitions: card.learningState?.repetitions || 0,
+                            lastReviewDate: card.learningState?.lastReviewDate ? new Date(card.learningState.lastReviewDate) : null,
+                        }
+                    });
+                }
             }
         });
 
-        // Create cards
-        for (const card of deckData.cards) {
-            await prisma.card.create({
-                data: {
-                    deckId: createdDeck.id,
-                    stem: card.stem,
-                    imageUrl: card.imageUrl,
-                    explanation: card.explanation,
-                    options: card.options as any, // Save as JSON
-                    correctOptionId: card.correctOptionId,
-                    // SRS State
-                    status: card.learningState.status,
-                    nextReviewDate: new Date(card.learningState.nextReviewDate),
-                    interval: card.learningState.interval,
-                    easeFactor: card.learningState.easeFactor,
-                    repetitions: card.learningState.repetitions,
-                    lastReviewDate: card.learningState.lastReviewDate ? new Date(card.learningState.lastReviewDate) : null,
-                }
-            });
-        }
-
         revalidatePath('/');
-        return true;
-    } catch (error) {
+        return { success: true };
+    } catch (error: any) {
         console.error("Import failed:", error);
-        return false;
+        return { success: false, error: error.message };
     }
 }
 

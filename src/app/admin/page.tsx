@@ -57,14 +57,14 @@ export default function AdminPage() {
                 }))
             };
 
-            const success = await importDeck(deckToImport);
-            if (success) {
+            const result = await importDeck(deckToImport);
+            if (result.success) {
                 const updatedDecks = await getDecks();
                 setDecks(updatedDecks);
                 setJsonInput('');
                 alert('Nhập thành công!');
             } else {
-                alert('Lỗi khi lưu vào database');
+                alert('Lỗi khi lưu vào database: ' + result.error);
             }
         } catch (err) {
             alert('Lỗi parse JSON: ' + err);
