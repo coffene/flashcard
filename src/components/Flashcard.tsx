@@ -1,23 +1,28 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card } from '@/types';
 import { Rating } from '@/lib/srs';
 
 interface FlashcardProps {
     card: Card;
     onRate: (rating: Rating) => void;
+    intervals?: {
+        again: string;
+        good: string;
+        easy: string;
+    };
 }
 
-export default function Flashcard({ card, onRate }: FlashcardProps) {
+export default function Flashcard({ card, onRate, intervals }: FlashcardProps) {
     const [isFlipped, setIsFlipped] = useState(false);
     const [selectedOption, setSelectedOption] = useState<string | null>(null);
 
     // Reset state when card changes
-    if (card.id !== card.id) {
-        // This check is tricky in React without useEffect, but key prop in parent handles it usually.
-        // We'll rely on the parent to force remount by changing the key.
-    }
+    useEffect(() => {
+        setIsFlipped(false);
+        setSelectedOption(null);
+    }, [card.id]);
 
     const handleOptionClick = (optionId: string) => {
         if (isFlipped) return; // Prevent changing answer after reveal
@@ -104,21 +109,24 @@ export default function Flashcard({ card, onRate }: FlashcardProps) {
                     <div className="grid grid-cols-3 gap-4">
                         <button
                             onClick={() => onRate('Again')}
-                            className="py-3 bg-red-100 hover:bg-red-200 text-red-700 font-bold rounded-lg border border-red-300"
+                            className="py-3 bg-red-100 hover:bg-red-200 text-red-700 font-bold rounded-lg border border-red-300 flex flex-col items-center justify-center"
                         >
-                            Quên (1m)
+                            <span>Quên</span>
+                            <span className="text-xs font-normal opacity-75">{intervals?.again || '1m'}</span>
                         </button>
                         <button
                             onClick={() => onRate('Good')}
-                            className="py-3 bg-blue-100 hover:bg-blue-200 text-blue-700 font-bold rounded-lg border border-blue-300"
+                            className="py-3 bg-blue-100 hover:bg-blue-200 text-blue-700 font-bold rounded-lg border border-blue-300 flex flex-col items-center justify-center"
                         >
-                            Nhớ (1d)
+                            <span>Nhớ</span>
+                            <span className="text-xs font-normal opacity-75">{intervals?.good || '1d'}</span>
                         </button>
                         <button
                             onClick={() => onRate('Easy')}
-                            className="py-3 bg-green-100 hover:bg-green-200 text-green-700 font-bold rounded-lg border border-green-300"
+                            className="py-3 bg-green-100 hover:bg-green-200 text-green-700 font-bold rounded-lg border border-green-300 flex flex-col items-center justify-center"
                         >
-                            Dễ (4d)
+                            <span>Dễ</span>
+                            <span className="text-xs font-normal opacity-75">{intervals?.easy || '4d'}</span>
                         </button>
                     </div>
                 )}

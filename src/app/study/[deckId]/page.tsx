@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getDeck, updateCardState } from '@/app/actions';
 import Flashcard from '@/components/Flashcard';
-import { calculateNextReview, Rating } from '@/lib/srs';
+import { calculateNextReview, formatInterval, Rating } from '@/lib/srs';
 import { Card, Deck } from '@/types';
 
 export default function StudyPage({ params }: { params: Promise<{ deckId: string }> }) {
@@ -75,6 +75,17 @@ export default function StudyPage({ params }: { params: Promise<{ deckId: string
 
     const currentCard = queue[currentIndex];
 
+    // Calculate predicted intervals for UI
+    const nextAgain = calculateNextReview(currentCard.learningState, 'Again');
+    const nextGood = calculateNextReview(currentCard.learningState, 'Good');
+    const nextEasy = calculateNextReview(currentCard.learningState, 'Easy');
+
+    const intervals = {
+        again: formatInterval(nextAgain.interval),
+        good: formatInterval(nextGood.interval),
+        easy: formatInterval(nextEasy.interval)
+    };
+
     return (
         <div className="min-h-screen bg-gray-100 flex flex-col">
             <header className="bg-white shadow-sm p-4 flex justify-between items-center">
@@ -84,7 +95,7 @@ export default function StudyPage({ params }: { params: Promise<{ deckId: string
                 <div className="text-center">
                     <h1 className="font-bold text-gray-800">{deck.title}</h1>
                     <span className="text-xs text-gray-500">
-                        Lượt {round} • Câu {deck.cards.findIndex(c => c.id === currentCard.id) + 1}/{deck.cards.length}
+                        Lượt {round} • Câu {currentIndex + 1}/{queue.length}
                     </span>
                 </div>
                 <div className="w-16"></div> {/* Spacer */}
@@ -95,6 +106,7 @@ export default function StudyPage({ params }: { params: Promise<{ deckId: string
                     key={currentCard.id} // Force remount on card change
                     card={currentCard}
                     onRate={handleRate}
+                    intervals={intervals}
                 />
             </main>
         </div>
