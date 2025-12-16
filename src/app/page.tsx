@@ -23,14 +23,14 @@ export default async function Home() {
         <header className="mb-10 text-center">
           <h1 className="text-4xl font-extrabold text-gray-900 mb-2">Flashcard Ôn Thi</h1>
           <p className="text-gray-600">Hệ thống ôn tập trắc nghiệm thông minh (SRS)</p>
-          <div className="mt-4">
+          {/* <div className="mt-4">
             <Link href="/admin" className="text-blue-600 hover:underline">Quản trị hệ thống</Link>
-          </div>
+          </div> */}
         </header>
 
         {subjects.length === 0 ? (
           <div className="text-center text-gray-500 py-10">
-            Chưa có bộ đề nào. <Link href="/admin" className="text-blue-600 underline">Tạo ngay</Link>
+            Chưa có bộ đề nào.
           </div>
         ) : (
           subjects.map(subject => (

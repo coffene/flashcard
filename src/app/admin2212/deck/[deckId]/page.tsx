@@ -68,7 +68,7 @@ export default function AdminDeckDetail({ params }: { params: Promise<{ deckId: 
                         <h1 className="text-2xl font-bold text-gray-900">Sửa bộ đề: {deck.title}</h1>
                         <p className="text-gray-500">ID: {deck.id}</p>
                     </div>
-                    <Link href="/admin" className="text-blue-600 hover:underline">← Quay lại</Link>
+                    <Link href="/admin2212" className="text-blue-600 hover:underline">← Quay lại</Link>
                 </div>
 
                 {/* Add Card Form */}

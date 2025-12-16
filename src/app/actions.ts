@@ -174,7 +174,7 @@ export async function addCard(deckId: string, card: Card) {
                 repetitions: 0,
             }
         });
-        revalidatePath(`/admin/deck/${deckId}`);
+        revalidatePath(`/admin2212/deck/${deckId}`);
         return true;
     } catch (error) {
         console.error("Add card failed:", error);

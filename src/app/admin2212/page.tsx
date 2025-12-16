@@ -166,7 +166,7 @@ export default function AdminPage() {
                                     </td>
                                     <td className="p-4 text-right space-x-2">
                                         <Link
-                                            href={`/admin/deck/${deck.id}`}
+                                            href={`/admin2212/deck/${deck.id}`}
                                             className="text-blue-600 hover:underline"
                                         >
                                             Sửa
