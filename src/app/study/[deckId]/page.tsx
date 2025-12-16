@@ -3,15 +3,16 @@
 import { useState, useEffect, use } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useStorage } from '@/hooks/useStorage';
+import { getDeck, updateCardState } from '@/app/actions';
 import Flashcard from '@/components/Flashcard';
 import { calculateNextReview, Rating } from '@/lib/srs';
-import { Card } from '@/types';
+import { Card, Deck } from '@/types';
 
 export default function StudyPage({ params }: { params: Promise<{ deckId: string }> }) {
     const { deckId } = use(params);
     const router = useRouter();
-    const { decks, isLoaded, updateCardState } = useStorage();
+    const [deck, setDeck] = useState<Deck | null>(null);
+    const [isLoaded, setIsLoaded] = useState(false);
 
     // State for Batch/Round Mode
     const [round, setRound] = useState(1);
@@ -20,22 +21,21 @@ export default function StudyPage({ params }: { params: Promise<{ deckId: string
     const [currentIndex, setCurrentIndex] = useState(0);
 
     useEffect(() => {
-        if (!isLoaded) return;
-        if (queue.length > 0) return; // Don't reset if already loaded
+        getDeck(deckId).then(d => {
+            setDeck(d);
+            setIsLoaded(true);
+            if (d) {
+                setQueue([...d.cards]);
+            }
+        });
+    }, [deckId]);
 
-        const deck = decks.find((d) => d.id === deckId);
-        if (!deck) return;
-
-        // Initial Load: All cards
-        setQueue([...deck.cards]);
-    }, [isLoaded, decks, deckId]);
-
-    const handleRate = (rating: Rating) => {
+    const handleRate = async (rating: Rating) => {
         const currentCard = queue[currentIndex];
         const newLearningState = calculateNextReview(currentCard.learningState, rating);
 
         // 1. Update Storage (Long term progress)
-        updateCardState(deckId, currentCard.id, newLearningState);
+        await updateCardState(deckId, currentCard.id, newLearningState);
 
         // 2. Add to next round queue with updated state
         const updatedCard = { ...currentCard, learningState: newLearningState };
@@ -67,8 +67,6 @@ export default function StudyPage({ params }: { params: Promise<{ deckId: string
     };
 
     if (!isLoaded) return <div className="p-8 text-center">Loading...</div>;
-
-    const deck = decks.find((d) => d.id === deckId);
     if (!deck) return <div className="p-8 text-center">Deck not found</div>;
 
     if (queue.length === 0) return <div className="p-8 text-center">Loading cards...</div>;

@@ -117,3 +117,92 @@ export async function resetDeck(deckId: string) {
         return false;
     }
 }
+
+export async function deleteDeck(deckId: string) {
+    try {
+        await prisma.deck.delete({
+            where: { id: deckId }
+        });
+        revalidatePath('/');
+        return true;
+    } catch (error) {
+        console.error("Delete deck failed:", error);
+        return false;
+    }
+}
+
+export async function getDeck(deckId: string): Promise<Deck | null> {
+    try {
+        const deck = await prisma.deck.findUnique({
+            where: { id: deckId },
+            include: { cards: true }
+        });
+        if (!deck) return null;
+        return mapPrismaDeckToDeck(deck);
+    } catch (error) {
+        console.error("Get deck failed:", error);
+        return null;
+    }
+}
+
+export async function addCard(deckId: string, card: Card) {
+    try {
+        await prisma.card.create({
+            data: {
+                deckId,
+                stem: card.stem,
+                imageUrl: card.imageUrl,
+                explanation: card.explanation,
+                options: card.options as any,
+                correctOptionId: card.correctOptionId,
+                status: 'New',
+                nextReviewDate: new Date(),
+                interval: 0,
+                easeFactor: 2.5,
+                repetitions: 0,
+            }
+        });
+        revalidatePath(`/admin/deck/${deckId}`);
+        return true;
+    } catch (error) {
+        console.error("Add card failed:", error);
+        return false;
+    }
+}
+
+export async function deleteCard(cardId: string) {
+    try {
+        await prisma.card.delete({
+            where: { id: cardId }
+        });
+        // We don't know the deckId here easily without fetching, but revalidatePath usually needs a path.
+        // Actually, we can just return true and let the client refresh.
+        return true;
+    } catch (error) {
+        console.error("Delete card failed:", error);
+        return false;
+    }
+}
+
+export async function updateCardState(deckId: string, cardId: string, newState: LearningState) {
+    try {
+        await prisma.card.update({
+            where: { id: cardId },
+            data: {
+                status: newState.status,
+                nextReviewDate: new Date(newState.nextReviewDate),
+                interval: newState.interval,
+                easeFactor: newState.easeFactor,
+                repetitions: newState.repetitions,
+                lastReviewDate: newState.lastReviewDate ? new Date(newState.lastReviewDate) : null,
+            }
+        });
+        revalidatePath(`/study/${deckId}`);
+        revalidatePath(`/deck/${deckId}`);
+        revalidatePath('/');
+        return true;
+    } catch (error) {
+        console.error("Update card state failed:", error);
+        return false;
+    }
+}

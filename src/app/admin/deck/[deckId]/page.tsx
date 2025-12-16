@@ -1,14 +1,15 @@
 'use client';
 
-import { use, useState } from 'react';
-import { useStorage } from '@/hooks/useStorage';
+import { use, useState, useEffect } from 'react';
+import { getDeck, addCard, deleteCard } from '@/app/actions';
 import Link from 'next/link';
-import { Card } from '@/types';
+import { Card, Deck } from '@/types';
 import { INITIAL_LEARNING_STATE } from '@/lib/srs';
 
 export default function AdminDeckDetail({ params }: { params: Promise<{ deckId: string }> }) {
     const { deckId } = use(params);
-    const { decks, isLoaded, addCard, deleteCard } = useStorage();
+    const [deck, setDeck] = useState<Deck | null>(null);
+    const [isLoaded, setIsLoaded] = useState(false);
 
     // Form state
     const [stem, setStem] = useState('');
@@ -20,12 +21,17 @@ export default function AdminDeckDetail({ params }: { params: Promise<{ deckId: 
     const [explanation, setExplanation] = useState('');
     const [imageUrl, setImageUrl] = useState('');
 
-    if (!isLoaded) return <div className="p-8">Loading...</div>;
+    useEffect(() => {
+        getDeck(deckId).then(d => {
+            setDeck(d);
+            setIsLoaded(true);
+        });
+    }, [deckId]);
 
-    const deck = decks.find(d => d.id === deckId);
+    if (!isLoaded) return <div className="p-8">Loading...</div>;
     if (!deck) return <div className="p-8">Deck not found</div>;
 
-    const handleAddCard = (e: React.FormEvent) => {
+    const handleAddCard = async (e: React.FormEvent) => {
         e.preventDefault();
         const id = `q_${Date.now()}`;
         const newCard: Card = {
@@ -43,7 +49,9 @@ export default function AdminDeckDetail({ params }: { params: Promise<{ deckId: 
             learningState: { ...INITIAL_LEARNING_STATE }
         };
 
-        addCard(deckId, newCard);
+        await addCard(deckId, newCard);
+        const updatedDeck = await getDeck(deckId);
+        setDeck(updatedDeck);
 
         // Reset form
         setStem('');
@@ -148,8 +156,12 @@ export default function AdminDeckDetail({ params }: { params: Promise<{ deckId: 
                                 </div>
                             </div>
                             <button
-                                onClick={() => {
-                                    if (confirm('Xóa câu hỏi này?')) deleteCard(deck.id, card.id);
+                                onClick={async () => {
+                                    if (confirm('Xóa câu hỏi này?')) {
+                                        await deleteCard(card.id);
+                                        const updatedDeck = await getDeck(deckId);
+                                        setDeck(updatedDeck);
+                                    }
                                 }}
                                 className="text-red-500 hover:text-red-700 text-sm"
                             >

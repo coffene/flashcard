@@ -2,20 +2,20 @@
 
 import { use, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useStorage } from '@/hooks/useStorage';
+import { getDeck } from '@/app/actions';
 import { Deck, LearningStatus } from '@/types';
 
 export default function DeckDetails({ params }: { params: Promise<{ deckId: string }> }) {
     const { deckId } = use(params);
-    const { decks, isLoaded } = useStorage();
     const [deck, setDeck] = useState<Deck | null>(null);
+    const [isLoaded, setIsLoaded] = useState(false);
 
     useEffect(() => {
-        if (isLoaded) {
-            const found = decks.find((d) => d.id === deckId);
-            setDeck(found || null);
-        }
-    }, [isLoaded, decks, deckId]);
+        getDeck(deckId).then(d => {
+            setDeck(d);
+            setIsLoaded(true);
+        });
+    }, [deckId]);
 
     if (!isLoaded) return <div className="p-8 text-center">Loading...</div>;
     if (!deck) return <div className="p-8 text-center">Deck not found</div>;

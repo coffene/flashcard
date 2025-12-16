@@ -1,37 +1,40 @@
 'use client';
 
-import { useState } from 'react';
-import { useStorage } from '@/hooks/useStorage';
+import { useState, useEffect } from 'react';
+import { createDeck, importDeck, getDecks, deleteDeck } from '@/app/actions';
 import Link from 'next/link';
 import { Deck } from '@/types';
+import { INITIAL_LEARNING_STATE } from '@/lib/srs';
 
 export default function AdminPage() {
-    const { decks, isLoaded, addDeck, deleteDeck } = useStorage();
+    const [decks, setDecks] = useState<Deck[]>([]);
+    const [isLoaded, setIsLoaded] = useState(false);
     const [newDeckTitle, setNewDeckTitle] = useState('');
     const [newDeckSubject, setNewDeckSubject] = useState('');
     const [jsonInput, setJsonInput] = useState('');
 
+    useEffect(() => {
+        getDecks().then(data => {
+            setDecks(data);
+            setIsLoaded(true);
+        });
+    }, []);
+
     if (!isLoaded) return <div className="p-8">Loading...</div>;
 
-    const handleCreateDeck = (e: React.FormEvent) => {
+    const handleCreateDeck = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!newDeckTitle || !newDeckSubject) return;
 
-        const newDeck: Deck = {
-            id: `deck_${Date.now()}`,
-            title: newDeckTitle,
-            subject: newDeckSubject,
-            cards: [],
-            isReadOnly: false,
-            year: new Date().getFullYear()
-        };
-
-        addDeck(newDeck);
-        setNewDeckTitle('');
-        setNewDeckSubject('');
+        const newDeck = await createDeck(newDeckTitle, newDeckSubject);
+        if (newDeck) {
+            setDecks([newDeck, ...decks]);
+            setNewDeckTitle('');
+            setNewDeckSubject('');
+        }
     };
 
-    const handleImportJson = (e: React.FormEvent) => {
+    const handleImportJson = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
             const parsed = JSON.parse(jsonInput);
@@ -41,7 +44,7 @@ export default function AdminPage() {
                 return;
             }
 
-            const newDeck: Deck = {
+            const deckToImport: Deck = {
                 ...parsed,
                 id: parsed.id || `deck_${Date.now()}`,
                 subject: parsed.subject || 'Tổng hợp',
@@ -50,19 +53,19 @@ export default function AdminPage() {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 cards: parsed.cards.map((c: any) => ({
                     ...c,
-                    learningState: {
-                        status: 'New',
-                        nextReviewDate: Date.now(),
-                        interval: 0,
-                        easeFactor: 2.5,
-                        repetitions: 0,
-                    }
+                    learningState: { ...INITIAL_LEARNING_STATE }
                 }))
             };
 
-            addDeck(newDeck);
-            setJsonInput('');
-            alert('Nhập thành công!');
+            const success = await importDeck(deckToImport);
+            if (success) {
+                const updatedDecks = await getDecks();
+                setDecks(updatedDecks);
+                setJsonInput('');
+                alert('Nhập thành công!');
+            } else {
+                alert('Lỗi khi lưu vào database');
+            }
         } catch (err) {
             alert('Lỗi parse JSON: ' + err);
         }
@@ -150,8 +153,11 @@ export default function AdminPage() {
                                             Sửa
                                         </Link>
                                         <button
-                                            onClick={() => {
-                                                if (confirm('Xóa bộ đề này?')) deleteDeck(deck.id);
+                                            onClick={async () => {
+                                                if (confirm('Xóa bộ đề này?')) {
+                                                    await deleteDeck(deck.id);
+                                                    setDecks(decks.filter(d => d.id !== deck.id));
+                                                }
                                             }}
                                             className="text-red-600 hover:underline ml-4"
                                         >
