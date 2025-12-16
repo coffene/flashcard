@@ -51,10 +51,29 @@ export default function AdminPage() {
                 isReadOnly: false,
                 year: parsed.year || new Date().getFullYear(),
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                cards: parsed.cards.map((c: any) => ({
-                    ...c,
-                    learningState: { ...INITIAL_LEARNING_STATE }
-                }))
+                cards: parsed.cards.map((c: any, cIdx: number) => {
+                    // Normalize options if they are strings
+                    let options = c.options;
+                    if (Array.isArray(c.options) && typeof c.options[0] === 'string') {
+                        options = c.options.map((opt: string, oIdx: number) => ({
+                            id: `opt_${Date.now()}_${cIdx}_${oIdx}`,
+                            text: opt
+                        }));
+                    }
+
+                    // Normalize correctOptionId if it's an index
+                    let correctOptionId = c.correctOptionId;
+                    if (typeof c.correctOptionId === 'number' && options[c.correctOptionId]) {
+                        correctOptionId = options[c.correctOptionId].id;
+                    }
+
+                    return {
+                        ...c,
+                        options,
+                        correctOptionId,
+                        learningState: { ...INITIAL_LEARNING_STATE }
+                    };
+                })
             };
 
             const result = await importDeck(deckToImport);
