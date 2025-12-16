@@ -59,20 +59,3 @@ export function calculateNextReview(
         lastReviewDate: now,
     };
 }
-
-export function formatInterval(intervalInDays: number): string {
-    if (intervalInDays === 0) return '< 10m';
-    if (intervalInDays < 1) {
-        const hours = Math.round(intervalInDays * 24);
-        return `${hours}h`;
-    }
-    if (intervalInDays >= 365) {
-        const years = (intervalInDays / 365).toFixed(1);
-        return `${years}y`;
-    }
-    if (intervalInDays >= 30) {
-        const months = (intervalInDays / 30).toFixed(1);
-        return `${months}mo`;
-    }
-    return `${Math.round(intervalInDays)}d`;
-}
