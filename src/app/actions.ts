@@ -218,3 +218,43 @@ export async function updateCardState(deckId: string, cardId: string, newState: 
         return false;
     }
 }
+
+export async function updateDeckFromJson(deckId: string, cards: Card[]) {
+    try {
+        await prisma.$transaction(async (tx) => {
+            // 1. Delete all existing cards
+            await tx.card.deleteMany({
+                where: { deckId }
+            });
+
+            // 2. Create new cards
+            if (cards.length > 0) {
+                const cardsData = cards.map(card => ({
+                    deckId,
+                    stem: card.stem,
+                    imageUrl: card.imageUrl,
+                    explanation: card.explanation,
+                    options: card.options as any,
+                    correctOptionId: card.correctOptionId,
+                    // Preserve SRS State if present, else default
+                    status: card.learningState?.status || 'New',
+                    nextReviewDate: card.learningState?.nextReviewDate ? new Date(card.learningState.nextReviewDate) : new Date(),
+                    interval: card.learningState?.interval || 0,
+                    easeFactor: card.learningState?.easeFactor || 2.5,
+                    repetitions: card.learningState?.repetitions || 0,
+                    lastReviewDate: card.learningState?.lastReviewDate ? new Date(card.learningState.lastReviewDate) : null,
+                }));
+
+                await tx.card.createMany({
+                    data: cardsData
+                });
+            }
+        });
+
+        revalidatePath(`/admin2212/deck/${deckId}`);
+        return { success: true };
+    } catch (error: any) {
+        console.error("Update deck from JSON failed:", error);
+        return { success: false, error: error.message };
+    }
+}

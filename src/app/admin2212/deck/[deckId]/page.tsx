@@ -1,7 +1,7 @@
 'use client';
 
 import { use, useState, useEffect } from 'react';
-import { getDeck, addCard, deleteCard } from '@/app/actions';
+import { getDeck, addCard, deleteCard, updateDeckFromJson } from '@/app/actions';
 import Link from 'next/link';
 import { Card, Deck } from '@/types';
 import { INITIAL_LEARNING_STATE } from '@/lib/srs';
@@ -10,6 +10,11 @@ export default function AdminDeckDetail({ params }: { params: Promise<{ deckId: 
     const { deckId } = use(params);
     const [deck, setDeck] = useState<Deck | null>(null);
     const [isLoaded, setIsLoaded] = useState(false);
+
+    // JSON Editor state
+    const [showJsonEditor, setShowJsonEditor] = useState(false);
+    const [jsonContent, setJsonContent] = useState('');
+    const [jsonError, setJsonError] = useState('');
 
     // Form state
     const [stem, setStem] = useState('');
@@ -27,6 +32,40 @@ export default function AdminDeckDetail({ params }: { params: Promise<{ deckId: 
             setIsLoaded(true);
         });
     }, [deckId]);
+
+    const handleOpenJsonEditor = () => {
+        if (deck) {
+            // Remove internal keys if needed, or just dump everything
+            // We might want to clean up the JSON a bit for easier editing if we want
+            // But for now, raw dump is fine.
+            setJsonContent(JSON.stringify(deck.cards, null, 2));
+            setShowJsonEditor(true);
+            setJsonError('');
+        }
+    };
+
+    const handleSaveJson = async () => {
+        try {
+            const cards = JSON.parse(jsonContent);
+            if (!Array.isArray(cards)) {
+                throw new Error("JSON must be an array of cards");
+            }
+
+            // Basic validation could go here
+
+            const result = await updateDeckFromJson(deckId, cards);
+            if (result.success) {
+                const updatedDeck = await getDeck(deckId);
+                setDeck(updatedDeck);
+                setShowJsonEditor(false);
+                alert("Cập nhật thành công!");
+            } else {
+                setJsonError(result.error || "Update failed");
+            }
+        } catch (e: any) {
+            setJsonError("Invalid JSON: " + e.message);
+        }
+    };
 
     if (!isLoaded) return <div className="p-8">Loading...</div>;
     if (!deck) return <div className="p-8">Deck not found</div>;
@@ -68,8 +107,51 @@ export default function AdminDeckDetail({ params }: { params: Promise<{ deckId: 
                         <h1 className="text-2xl font-bold text-gray-900">Sửa bộ đề: {deck.title}</h1>
                         <p className="text-gray-500">ID: {deck.id}</p>
                     </div>
-                    <Link href="/admin2212" className="text-blue-600 hover:underline">← Quay lại</Link>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={handleOpenJsonEditor}
+                            className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
+                        >
+                            {showJsonEditor ? 'Đóng JSON' : 'Sửa JSON'}
+                        </button>
+                        <Link href="/admin2212" className="px-4 py-2 text-blue-600 hover:underline border border-blue-600 rounded">
+                            ← Quay lại
+                        </Link>
+                    </div>
                 </div>
+
+                {showJsonEditor && (
+                    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-8">
+                        <h2 className="text-lg font-bold mb-4">Sửa JSON trực tiếp</h2>
+                        <p className="text-sm text-gray-500 mb-2">
+                            Cẩn thận: Hành động này sẽ thay thế toàn bộ danh sách câu hỏi hiện tại bằng nội dung bên dưới.
+                        </p>
+                        {jsonError && (
+                            <div className="p-3 mb-4 bg-red-100 text-red-700 rounded">
+                                {jsonError}
+                            </div>
+                        )}
+                        <textarea
+                            className="w-full p-4 border rounded font-mono text-sm h-96 bg-gray-50"
+                            value={jsonContent}
+                            onChange={e => setJsonContent(e.target.value)}
+                        />
+                        <div className="mt-4 flex justify-end gap-2">
+                            <button
+                                onClick={() => setShowJsonEditor(false)}
+                                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded"
+                            >
+                                Hủy
+                            </button>
+                            <button
+                                onClick={handleSaveJson}
+                                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                            >
+                                Lưu thay đổi
+                            </button>
+                        </div>
+                    </div>
+                )}
 
                 {/* Add Card Form */}
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-8">
