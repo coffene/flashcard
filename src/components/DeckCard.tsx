@@ -21,18 +21,18 @@ export default function DeckCard({ deck }: { deck: Deck }) {
     };
 
     return (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow p-6 flex flex-col h-full">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow p-6 flex flex-col h-full">
             <div className="flex justify-between items-start mb-4">
                 <div>
-                    <h2 className="text-xl font-bold text-gray-800">{deck.title}</h2>
-                    <p className="text-sm text-gray-500">{deck.timeLimit ? `${deck.timeLimit} phút` : ''}</p>
+                    <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">{deck.title}</h2>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{deck.timeLimit ? `${deck.timeLimit} phút` : ''}</p>
                 </div>
                 <div className="text-right">
-                    <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded block mb-1">
+                    <span className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium px-2.5 py-0.5 rounded block mb-1">
                         {deck.cards.length} câu
                     </span>
                     {studiedToday > 0 && (
-                        <span className="text-xs text-green-600 font-medium">
+                        <span className="text-xs text-green-600 dark:text-green-400 font-medium">
                             Hôm nay: {studiedToday}
                         </span>
                     )}
@@ -41,12 +41,12 @@ export default function DeckCard({ deck }: { deck: Deck }) {
 
             <div className="flex space-x-4 mb-6 text-sm">
                 <div className="text-center">
-                    <span className="block text-2xl font-bold text-red-500">{dueCards}</span>
-                    <span className="text-gray-500">Cần ôn</span>
+                    <span className="block text-2xl font-bold text-red-500 dark:text-red-400">{dueCards}</span>
+                    <span className="text-gray-500 dark:text-gray-400">Cần ôn</span>
                 </div>
                 <div className="text-center">
-                    <span className="block text-2xl font-bold text-blue-500">{newCards}</span>
-                    <span className="text-gray-500">Mới</span>
+                    <span className="block text-2xl font-bold text-blue-500 dark:text-blue-400">{newCards}</span>
+                    <span className="text-gray-500 dark:text-gray-400">Mới</span>
                 </div>
                 <div className="text-center">
                     <span className="block text-2xl font-bold text-green-500">

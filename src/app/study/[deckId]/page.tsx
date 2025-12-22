@@ -7,6 +7,7 @@ import { getDeck, updateCardState } from '@/app/actions';
 import Flashcard from '@/components/Flashcard';
 import { calculateNextReview, Rating } from '@/lib/srs';
 import { Card, Deck } from '@/types';
+import ThemeToggle from '@/components/ThemeToggle';
 
 export default function StudyPage({ params }: { params: Promise<{ deckId: string }> }) {
     const { deckId } = use(params);
@@ -68,26 +69,28 @@ export default function StudyPage({ params }: { params: Promise<{ deckId: string
         setRound(r => r + 1);
     };
 
-    if (!isLoaded) return <div className="p-8 text-center">Loading...</div>;
-    if (!deck) return <div className="p-8 text-center">Deck not found</div>;
+    if (!isLoaded) return <div className="p-8 text-center dark:text-white">Loading...</div>;
+    if (!deck) return <div className="p-8 text-center dark:text-white">Deck not found</div>;
 
-    if (queue.length === 0) return <div className="p-8 text-center">Loading cards...</div>;
+    if (queue.length === 0) return <div className="p-8 text-center dark:text-white">Loading cards...</div>;
 
     const currentCard = queue[currentIndex];
 
     return (
-        <div className="min-h-screen bg-gray-100 flex flex-col">
-            <header className="bg-white shadow-sm p-4 flex justify-between items-center">
-                <Link href="/" className="text-gray-500 hover:text-gray-800 font-medium">
+        <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex flex-col transition-colors duration-200">
+            <header className="bg-white dark:bg-gray-800 shadow-sm p-4 flex justify-between items-center transition-colors duration-200">
+                <Link href="/" className="text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 font-medium">
                     ← Quay lại
                 </Link>
                 <div className="text-center">
-                    <h1 className="font-bold text-gray-800">{deck.title}</h1>
-                    <span className="text-xs text-gray-500">
+                    <h1 className="font-bold text-gray-800 dark:text-white">{deck.title}</h1>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
                         Lượt {round} • Câu {deck.cards.findIndex(c => c.id === currentCard.id) + 1}/{deck.cards.length}
                     </span>
                 </div>
-                <div className="w-16"></div> {/* Spacer */}
+                <div className="w-16 flex justify-end">
+                    <ThemeToggle />
+                </div>
             </header>
 
             <main className="flex-grow flex items-center justify-center p-4">
