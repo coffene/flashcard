@@ -5,6 +5,7 @@ import { getDeck, addCard, deleteCard, updateDeckFromJson } from '@/app/actions'
 import Link from 'next/link';
 import { Card, Deck } from '@/types';
 import { INITIAL_LEARNING_STATE } from '@/lib/srs';
+import ThemeToggle from '@/components/ThemeToggle';
 
 export default function AdminDeckDetail({ params }: { params: Promise<{ deckId: string }> }) {
     const { deckId } = use(params);
@@ -67,8 +68,8 @@ export default function AdminDeckDetail({ params }: { params: Promise<{ deckId: 
         }
     };
 
-    if (!isLoaded) return <div className="p-8">Loading...</div>;
-    if (!deck) return <div className="p-8">Deck not found</div>;
+    if (!isLoaded) return <div className="p-8 dark:bg-gray-900 dark:text-white min-h-screen">Loading...</div>;
+    if (!deck) return <div className="p-8 dark:bg-gray-900 dark:text-white min-h-screen">Deck not found</div>;
 
     const handleAddCard = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -100,52 +101,53 @@ export default function AdminDeckDetail({ params }: { params: Promise<{ deckId: 
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 p-8">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-8 transition-colors duration-300">
             <div className="max-w-4xl mx-auto">
                 <div className="flex justify-between items-center mb-8">
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900">Sửa bộ đề: {deck.title}</h1>
-                        <p className="text-gray-500">ID: {deck.id}</p>
+                        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Sửa bộ đề: {deck.title}</h1>
+                        <p className="text-gray-500 dark:text-gray-400">ID: {deck.id}</p>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 items-center">
+                        <ThemeToggle />
                         <button
                             onClick={handleOpenJsonEditor}
-                            className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
+                            className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 dark:hover:bg-purple-500"
                         >
                             {showJsonEditor ? 'Đóng JSON' : 'Sửa JSON'}
                         </button>
-                        <Link href="/admin2212" className="px-4 py-2 text-blue-600 hover:underline border border-blue-600 rounded">
+                        <Link href="/admin2212" className="px-4 py-2 text-blue-600 dark:text-blue-400 hover:underline border border-blue-600 dark:border-blue-400 rounded">
                             ← Quay lại
                         </Link>
                     </div>
                 </div>
 
                 {showJsonEditor && (
-                    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-8">
-                        <h2 className="text-lg font-bold mb-4">Sửa JSON trực tiếp</h2>
-                        <p className="text-sm text-gray-500 mb-2">
+                    <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 mb-8">
+                        <h2 className="text-lg font-bold mb-4 text-gray-900 dark:text-white">Sửa JSON trực tiếp</h2>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
                             Cẩn thận: Hành động này sẽ thay thế toàn bộ danh sách câu hỏi hiện tại bằng nội dung bên dưới.
                         </p>
                         {jsonError && (
-                            <div className="p-3 mb-4 bg-red-100 text-red-700 rounded">
+                            <div className="p-3 mb-4 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded">
                                 {jsonError}
                             </div>
                         )}
                         <textarea
-                            className="w-full p-4 border rounded font-mono text-sm h-96 bg-gray-50"
+                            className="w-full p-4 border rounded font-mono text-sm h-96 bg-gray-50 dark:bg-gray-900 dark:border-gray-600 dark:text-gray-100"
                             value={jsonContent}
                             onChange={e => setJsonContent(e.target.value)}
                         />
                         <div className="mt-4 flex justify-end gap-2">
                             <button
                                 onClick={() => setShowJsonEditor(false)}
-                                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded"
+                                className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
                             >
                                 Hủy
                             </button>
                             <button
                                 onClick={handleSaveJson}
-                                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 dark:hover:bg-green-500"
                             >
                                 Lưu thay đổi
                             </button>
@@ -154,13 +156,13 @@ export default function AdminDeckDetail({ params }: { params: Promise<{ deckId: 
                 )}
 
                 {/* Add Card Form */}
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-8">
-                    <h2 className="text-lg font-bold mb-4">Thêm câu hỏi mới</h2>
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 mb-8">
+                    <h2 className="text-lg font-bold mb-4 text-gray-900 dark:text-white">Thêm câu hỏi mới</h2>
                     <form onSubmit={handleAddCard} className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Câu hỏi</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Câu hỏi</label>
                             <textarea
-                                className="w-full p-2 border rounded"
+                                className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                 rows={2}
                                 value={stem}
                                 onChange={e => setStem(e.target.value)}
@@ -169,10 +171,10 @@ export default function AdminDeckDetail({ params }: { params: Promise<{ deckId: 
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Link ảnh (Tùy chọn)</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Link ảnh (Tùy chọn)</label>
                             <input
                                 type="text"
-                                className="w-full p-2 border rounded"
+                                className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                 value={imageUrl}
                                 onChange={e => setImageUrl(e.target.value)}
                             />
@@ -181,7 +183,7 @@ export default function AdminDeckDetail({ params }: { params: Promise<{ deckId: 
                         <div className="grid grid-cols-2 gap-4">
                             {[optA, optB, optC, optD].map((opt, idx) => (
                                 <div key={idx}>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                         Đáp án {['A', 'B', 'C', 'D'][idx]}
                                         <input
                                             type="radio"
@@ -193,7 +195,7 @@ export default function AdminDeckDetail({ params }: { params: Promise<{ deckId: 
                                     </label>
                                     <input
                                         type="text"
-                                        className="w-full p-2 border rounded"
+                                        className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                         value={[optA, optB, optC, optD][idx]}
                                         onChange={e => {
                                             if (idx === 0) setOptA(e.target.value);
@@ -208,16 +210,16 @@ export default function AdminDeckDetail({ params }: { params: Promise<{ deckId: 
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Giải thích</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Giải thích</label>
                             <textarea
-                                className="w-full p-2 border rounded"
+                                className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                 rows={2}
                                 value={explanation}
                                 onChange={e => setExplanation(e.target.value)}
                             />
                         </div>
 
-                        <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 font-bold">
+                        <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 dark:hover:bg-blue-500 font-bold">
                             Thêm câu hỏi
                         </button>
                     </form>
@@ -226,12 +228,12 @@ export default function AdminDeckDetail({ params }: { params: Promise<{ deckId: 
                 {/* List Cards */}
                 <div className="space-y-4">
                     {deck.cards.map((card, idx) => (
-                        <div key={card.id} className="bg-white p-4 rounded-lg border border-gray-200 flex justify-between items-start">
+                        <div key={card.id} className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 flex justify-between items-start">
                             <div>
-                                <div className="font-bold text-gray-900 mb-1">Câu {idx + 1}: {card.stem}</div>
-                                <div className="text-sm text-gray-600 grid grid-cols-2 gap-x-4">
+                                <div className="font-bold text-gray-900 dark:text-white mb-1">Câu {idx + 1}: {card.stem}</div>
+                                <div className="text-sm text-gray-600 dark:text-gray-300 grid grid-cols-2 gap-x-4">
                                     {card.options.map((opt, i) => (
-                                        <span key={opt.id} className={card.correctOptionId === opt.id ? "text-green-600 font-bold" : ""}>
+                                        <span key={opt.id} className={card.correctOptionId === opt.id ? "text-green-600 dark:text-green-400 font-bold" : ""}>
                                             {['A', 'B', 'C', 'D'][i]}. {opt.text}
                                         </span>
                                     ))}
@@ -245,7 +247,7 @@ export default function AdminDeckDetail({ params }: { params: Promise<{ deckId: 
                                         setDeck(updatedDeck);
                                     }
                                 }}
-                                className="text-red-500 hover:text-red-700 text-sm"
+                                className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-sm"
                             >
                                 Xóa
                             </button>
