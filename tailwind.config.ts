@@ -14,7 +14,7 @@ const config: Config = {
                 foreground: "var(--foreground)",
             },
             fontFamily: {
-                code: ["var(--font-source-code-pro)", "monospace"],
+                code: ['"Source Code Pro"', "monospace"],
             },
         },
     },
