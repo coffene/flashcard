@@ -46,6 +46,10 @@ export default function Flashcard({ card, onRate }: FlashcardProps) {
         return `${baseStyle} opacity-50 dark:border-gray-600`;
     };
 
+    const isCodeLike = (text: string) => {
+        return text.includes('\n') || /[{}[\]<>=_]/.test(text) || text.includes('Min_Support');
+    };
+
     return (
         <div className="w-full max-w-2xl mx-auto bg-white dark:bg-gray-800 shadow-xl rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 min-h-[400px] flex flex-col">
             {/* Card Content */}
@@ -54,7 +58,7 @@ export default function Flashcard({ card, onRate }: FlashcardProps) {
                     <span className="inline-block px-2 py-1 text-xs font-semibold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 rounded mb-2">
                         Câu hỏi
                     </span>
-                    <div className={`text-gray-800 dark:text-gray-100 leading-relaxed ${card.stem.includes('\n') ? 'whitespace-pre-wrap font-mono text-sm' : 'text-xl font-medium'}`}>
+                    <div className={`text-gray-800 dark:text-gray-100 leading-relaxed ${isCodeLike(card.stem) ? 'whitespace-pre-wrap font-code text-sm' : 'text-xl font-medium'}`}>
                         {card.stem}
                     </div>
                     {card.imageUrl && (
