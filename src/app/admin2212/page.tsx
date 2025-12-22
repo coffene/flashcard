@@ -128,8 +128,26 @@ export default function AdminPage() {
                     <form onSubmit={handleImportJson} className="space-y-4">
                         <textarea
                             className="w-full p-2 border rounded font-mono text-sm"
-                            rows={4}
-                            placeholder='{"title": "Đề mẫu", "subject": "Toán", "cards": [{"id": "c1", "stem": "1+1=?", "options": [{"id":"o1","text":"2"}], "correctAnswerId": "o1"}]}'
+                            rows={15}
+                            placeholder={`{
+  "title": "Tên Đề Thi Hoặc Bộ Câu Hỏi",
+  "subject": "Tên Môn Học",
+  "year": 2024,
+  "timeLimit": 60,
+  "cards": [
+    {
+      "stem": "Nội dung câu hỏi số 1 ở đây?",
+      "options": [
+        { "id": "q1_optA", "text": "Nội dung lựa chọn A" },
+        { "id": "q1_optB", "text": "Nội dung lựa chọn B" },
+        { "id": "q1_optC", "text": "Nội dung lựa chọn C" },
+        { "id": "q1_optD", "text": "Nội dung lựa chọn D" }
+      ],
+      "correctOptionId": "q1_optB",
+      "explanation": "Giải thích chi tiết tại sao đáp án này đúng (Tùy chọn)."
+    }
+  ]
+}`}
                             value={jsonInput}
                             onChange={e => setJsonInput(e.target.value)}
                         />
