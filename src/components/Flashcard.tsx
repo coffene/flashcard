@@ -54,9 +54,9 @@ export default function Flashcard({ card, onRate }: FlashcardProps) {
                     <span className="inline-block px-2 py-1 text-xs font-semibold text-gray-500 bg-gray-100 rounded mb-2">
                         Câu hỏi
                     </span>
-                    <h2 className="text-xl font-medium text-gray-800 leading-relaxed">
+                    <div className={`text-gray-800 leading-relaxed ${card.stem.includes('\n') ? 'whitespace-pre-wrap font-mono text-sm' : 'text-xl font-medium'}`}>
                         {card.stem}
-                    </h2>
+                    </div>
                     {card.imageUrl && (
                         <div className="mt-4 flex justify-center">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
